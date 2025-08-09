@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     } catch { }
 
     // Fallback to server PAT if user token missing
-    if (!token) token = process.env.GITHUB_TOKEN;
+    // if (!token) token = process.env.GITHUB_TOKEN;
     if (!token) return NextResponse.json({ repos: [] }, { status: 200 });
 
     const ghRes = await fetch("https://api.github.com/user/repos?per_page=100&type=all&sort=updated", {
