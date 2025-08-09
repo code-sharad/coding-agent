@@ -34,6 +34,7 @@ export default function Home() {
   const [view, setView] = useState<"logs" | "files" | "diffs">("logs");
   const [showConnect, setShowConnect] = useState(false);
   const [reposLoading, setReposLoading] = useState(false);
+  const [disableAuthBtn, setDisableAuthBtn] = useState(false);
   const fetchRepos = useCallback(async () => {
     if (!authed) return;
     setReposLoading(true);
@@ -63,6 +64,7 @@ export default function Home() {
   const canRun = useMemo(() => authed && selectedRepo && task.trim().length > 5, [authed, selectedRepo, task]);
 
   const handleConnect = async () => {
+    setDisableAuthBtn(true);
     await signIn.social({ provider: "github" });
   };
 
@@ -295,7 +297,7 @@ export default function Home() {
                   onClick={runAgent}
                   disabled={!canRun || running}
                 >
-                  <Wand2 className="mr-2 h-4 w-4" /> {running ? "running…" : "run agent"}
+                  <Wand2 className="mr-2 h-4 w-4" /> {running ? "running…" : "Run agent"}
                 </Button>
               </div>
             </div>
