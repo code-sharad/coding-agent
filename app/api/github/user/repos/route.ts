@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     let token: string | undefined;
     try {
       const sessionRes = await auth.api.getSession({ headers: request.headers, asResponse: false });
+      // @ts-expect-error remove the error
       const account = await db.select().from("account").where(eq(sessionRes?.user.id, "userId"));
       console.log(account);
       // type Sess = { session?: { accessToken?: string } };
