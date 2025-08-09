@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
       const sessionRes = await auth.api.getSession({ headers: request.headers, asResponse: false });
       type Sess = { session?: { accessToken?: string } };
       token = (sessionRes as Sess)?.session?.accessToken;
+      console.log(sessionRes?.session)
     } catch { }
 
     // Fallback to server PAT if user token missing
