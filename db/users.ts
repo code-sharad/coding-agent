@@ -9,9 +9,10 @@ export async function upsertUser(input: {
   githubId?: string | null;
 }) {
   const email = input.email.toLowerCase();
-  const existing = db.select().from(users).where(eq(users.email, email)).get();
+  const existingArr = await db.select().from(users).where(eq(users.email, email));
+  const existing = existingArr[0];
   if (existing) {
-    const updated = db
+    const updatedArr = await db
       .update(users)
       .set({
         name: input.name ?? existing.name,
@@ -20,19 +21,22 @@ export async function upsertUser(input: {
         updatedAt: new Date(),
       })
       .where(eq(users.id, existing.id))
-      .returning()
-      .get();
-    return updated;
+      .returning();
+    return updatedArr[0];
   }
-  const inserted = db
+  const now = new Date();
+  const insertedArr = await db
     .insert(users)
     .values({
+      id: crypto.randomUUID(),
       email,
       name: input.name ?? null,
       image: input.image ?? null,
       githubId: input.githubId ?? null,
+      role: "user",
+      createdAt: now,
+      updatedAt: now,
     })
-    .returning()
-    .get();
-  return inserted;
+    .returning();
+  return insertedArr[0];
 }
