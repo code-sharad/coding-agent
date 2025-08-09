@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { db } from "@/db/client";
+import { eq } from "drizzle-orm";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,9 +15,11 @@ export async function GET(request: NextRequest) {
     let token: string | undefined;
     try {
       const sessionRes = await auth.api.getSession({ headers: request.headers, asResponse: false });
-      type Sess = { session?: { accessToken?: string } };
-      token = (sessionRes as Sess)?.session?.accessToken;
-      console.log(sessionRes?.session)
+      const account = await db.select().from("account").where(eq(sessionRes?.user.id, "userId"));
+      console.log(account);
+      // type Sess = { session?: { accessToken?: string } };
+      // token = (sessionRes as Sess)?.session?.accessToken;
+
     } catch { }
 
     // Fallback to server PAT if user token missing
