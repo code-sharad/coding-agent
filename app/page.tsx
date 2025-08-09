@@ -20,6 +20,17 @@ type PRCreatedEvent = { url: string; branch?: string };
 
 export default function Home() {
   const session = useSession();
+  // Derive a loading flag from common shapes (status/isLoading/isPending)
+  const sessionLoading = useMemo(() => {
+    const s = session as unknown;
+    if (s && typeof s === "object") {
+      const o = s as Record<string, unknown>;
+      if (typeof o.status === "string") return o.status === "loading";
+      if (typeof o.isLoading === "boolean") return Boolean(o.isLoading);
+      if (typeof o.isPending === "boolean") return Boolean(o.isPending);
+    }
+    return false;
+  }, [session]);
   const authed = !!session.data?.user;
   // Step state
   const [repos, setRepos] = useState<Repo[]>([]);
@@ -34,7 +45,8 @@ export default function Home() {
   const [view, setView] = useState<"logs" | "files" | "diffs">("logs");
   const [showConnect, setShowConnect] = useState(false);
   const [reposLoading, setReposLoading] = useState(false);
-  const [disableAuthBtn, setDisableAuthBtn] = useState(false);
+  const [connectLoading, setConnectLoading] = useState(false);
+
   const fetchRepos = useCallback(async () => {
     if (!authed) return;
     setReposLoading(true);
@@ -52,6 +64,7 @@ export default function Home() {
 
   // Load repos when authed; show connect dialog otherwise
   useEffect(() => {
+    if (sessionLoading) return; // don't toggle UI while session is fetching
     if (!authed) {
       setShowConnect(true);
       setRepos([]);
@@ -59,13 +72,19 @@ export default function Home() {
     }
     setShowConnect(false);
     fetchRepos();
-  }, [authed, fetchRepos]);
+  }, [authed, fetchRepos, sessionLoading]);
 
   const canRun = useMemo(() => authed && selectedRepo && task.trim().length > 5, [authed, selectedRepo, task]);
 
   const handleConnect = async () => {
-    setDisableAuthBtn(true);
-    await signIn.social({ provider: "github" });
+    if (connectLoading) return;
+    setConnectLoading(true);
+    try {
+      await signIn.social({ provider: "github" });
+    } catch {
+      // If sign-in fails (no redirect), re-enable the button
+      setConnectLoading(false);
+    }
   };
 
   const logRef = useRef<HTMLDivElement | null>(null);
@@ -87,7 +106,7 @@ export default function Home() {
           ticks: 150,
           origin: { x: -0.1, y: 1 },
           colors,
-          angle:60
+          angle: 60
         });
         if (Date.now() < end) requestAnimationFrame(frame);
       };
@@ -205,6 +224,20 @@ export default function Home() {
     setRunning(false);
   };
 
+  // While fetching session, show a lightweight loading view
+  if (sessionLoading) {
+    return (
+      <div className="min-h-svh bg-background">
+        <div className="mx-auto max-w-7xl px-5 py-8">
+          <div className="border p-6 sm:p-8 md:p-10 min-h-[75svh] flex flex-col items-center justify-center gap-4">
+            <div className="h-6 w-6 rounded-full border-2 border-muted-foreground border-t-transparent animate-spin" />
+            <div className="text-sm text-muted-foreground">Checking your session…</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-svh bg-background">
       <div className="mx-auto max-w-7xl px-5 py-8">
@@ -225,14 +258,11 @@ export default function Home() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-5">
-              <Button onClick={handleConnect} size="lg" className="w-full h-11 ">
+              <Button onClick={handleConnect} disabled={connectLoading || sessionLoading} aria-busy={connectLoading}
+                size="lg" className="w-full h-11 ">
                 <Github className="mr-2 h-4 w-4" /> Continue with GitHub
               </Button>
-              <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li>Grants read access to your repos and profile.</li>
-                <li>Creates changes on a new branch and opens a PR; never touches default directly.</li>
-                <li>You can revoke access anytime from your GitHub settings.</li>
-              </ul>
+
             </div>
           </DialogContent>
         </Dialog>
@@ -242,6 +272,7 @@ export default function Home() {
             <span className="text-md font-mono">Coding Agent</span>
             <button
               onClick={!authed ? handleConnect : undefined}
+              disabled={!authed && (connectLoading || sessionLoading)}
               className="h-9 w-9 rounded-full border flex items-center justify-center"
               aria-label={authed ? "Account" : "Connect GitHub"}
               title={authed ? "Account" : "Connect GitHub"}
@@ -267,8 +298,8 @@ export default function Home() {
             {/* Select repo pill */}
             <div className="w-full max-w-xs">
               <Select value={selectedRepo} onValueChange={setSelectedRepo} disabled={!authed || reposLoading}>
-                <SelectTrigger className="rounded-full">
-                  <SelectValue placeholder={!authed ? "Connect GitHub first" : reposLoading ? "Loading repos…" : repos.length ? "select repo" : "No repos found"} />
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder={!authed ? "Connect GitHub first" : reposLoading ? "Loading repos…" : repos.length ? "Select Repo" : "No repos found"} />
                 </SelectTrigger>
                 <SelectContent>
                   {repos.map((r) => (
