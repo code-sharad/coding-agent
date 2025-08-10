@@ -13,10 +13,47 @@ import { useSession, signIn } from "@/lib/auth-client";
 import Image from "next/image";
 import confetti from "canvas-confetti";
 
+import AutoScroll from "embla-carousel-auto-scroll";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousal";
+
 type Repo = { id: number; full_name: string };
 type FileListEvent = { path: string; output: string };
 type FileDiffEvent = { path: string; before: string; after: string };
 type PRCreatedEvent = { url: string; branch?: string };
+
+
+const features = [
+  {
+    name: "Repo-aware edit",
+    description: "Reads your code and suggests precise changes.",
+    icon: <FileCode className="h-6 w-6" />
+  },
+  {
+    name: "Live logs",
+    description: "Streamed output and status as it works.",
+    icon: <Terminal className="h-6 w-6" />
+  },
+  {
+    name: "Sandboxed changes",
+    description: "Isolated env; no local mess-ups.",
+    icon: <GitBranch className="h-6 w-6" />
+  },
+  {
+    name: "Fast start",
+    description: "Pick a repo, describe a task, run.",
+    icon: <GitPullRequest className="h-6 w-6" />
+  },
+  {
+    name: "Auto PRs",
+    description: "Commits, pushes, and opens PRs for you.",
+    icon: <ShieldCheck className="h-6 w-6" />
+  },
+  {
+    name: "Private-safe",
+    description: "Per-user tokens; your access stays yours.",
+    icon: <Rocket className="h-6 w-6" />
+  }
+]
 
 export default function Home() {
   const session = useSession();
@@ -248,11 +285,11 @@ export default function Home() {
         >
           <DialogContent
             hideClose
-            className="sm:max-w-xl md:max-w-2xl p-0 overflow-hidden rounded-3xl border-0 shadow-2xl"
+            className="sm:max-w-xl md:max-w-2xl p-0 overflow-hidden rounded-3xl border-0 shadow-2xl max-h-[85svh] sm:max-h-[80svh] flex flex-col"
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
-            <div className="relative isolate">
+            <div className="relative isolate flex flex-col h-full">
               {/* Soft gradient background */}
               <div className="pointer-events-none absolute inset-0 opacity-70">
                 <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-indigo-500/40 via-violet-500/30 to-cyan-400/30 blur-3xl" />
@@ -260,37 +297,45 @@ export default function Home() {
               </div>
 
               {/* Header */}
-              <div className="relative z-10 px-6 pt-6 pb-3 sm:px-8">
-                <div className="inline-flex items-center gap-2 rounded-full border bg-white/5 px-3 py-1 text-xs text-foreground/80 backdrop-blur">
-                  <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  AI-powered Code Agent
+              <div className="relative z-10 flex-1 overflow-y-auto px-0 pt-6 pb-2 sm:px-0">
+               <div className="px-6 text-center md:text-left">
+                  <div className="inline-flex items-center  gap-2 rounded-full border bg-white/5 px-3 py-1 text-xs text-foreground/80 backdrop-blur">
+                    <span className="inline-flex  h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    AI-powered Code Agent
+                  </div>
+                  <DialogHeader>
+                    <DialogTitle className="mt-3 font-serif text-3xl sm:text-4xl leading-tight">
+                      <span className="bg-gradient-to-r from-white to-neutral-300 bg-clip-text text-transparent">
+                        Build smarter with GitHub
+                      </span>
+                    </DialogTitle>
+                    <DialogDescription className="mt-2 text-base text-muted-foreground">
+                      Connect your GitHub to let the agent explore your repo, propose changes, and open PRs — all with live logs and safety.
+                    </DialogDescription>
+                  </DialogHeader></div>
+
+                {/* Features */}
+                <div className="mt-2 relative">
+                  <Carousel
+                    opts={{ loop: true }}
+                    plugins={[AutoScroll({ playOnInit: true })]}>
+                    <CarouselContent className="ml-0 gap-3 sm:gap-4">
+                      {features.map((card, i) => (
+                        <CarouselItem
+                          key={i}
+                          className="basis-[80%] sm:basis-1/2 md:basis-1/3 lg:basis-1/2 flex flex-col items-center gap-2 p-3 sm:p-4"
+                        >
+                          <Feature icon={card.icon} title={card.name} desc={card.description} />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                  </Carousel>
+
                 </div>
-                <DialogHeader>
-                  <DialogTitle className="mt-3 font-serif text-3xl sm:text-4xl leading-tight">
-                    <span className="bg-gradient-to-r from-white to-neutral-300 bg-clip-text text-transparent">
-                      Build smarter with GitHub
-                    </span>
-                  </DialogTitle>
-                  <DialogDescription className="mt-2 text-base text-muted-foreground">
-                    Connect your GitHub to let the agent explore your repo, propose changes, and open PRs — all with live logs and safety.
-                  </DialogDescription>
-                </DialogHeader>
               </div>
 
-              {/* Features */}
-              <div className="relative z-10 px-6 pb-4 sm:px-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                  <Feature icon={<FileCode className="h-6 w-6" />} title="Repo-aware edits" desc="Reads your code and suggests precise changes." />
-                  <Feature icon={<Terminal className="h-6 w-6" />} title="Live logs" desc="Streamed output and status as it works." />
-                  <Feature icon={<GitBranch className="h-6 w-6" />} title="Sandboxed changes" desc="Isolated env; no local mess-ups." />
-                  <Feature icon={<GitPullRequest className="h-6 w-6" />} title="Auto PRs" desc="Commits, pushes, and opens PRs for you." />
-                  <Feature icon={<ShieldCheck className="h-6 w-6" />} title="Private-safe" desc="Per-user tokens; your access stays yours." />
-                  <Feature icon={<Rocket className="h-6 w-6" />} title="Fast start" desc="Pick a repo, describe a task, run." />
-                </div>
-              </div>
-
-              {/* Sticky footer */}
-              <div className="z-10 sticky bottom-0 -mb-px border-t bg-background/80 backdrop-blur px-6 py-4 sm:px-8">
+              {/* Footer (fixed within dialog) */}
+              <div className="z-10 border-t bg-background/80 backdrop-blur px-6 py-4 sm:px-8 pb-[env(safe-area-inset-bottom)]">
                 <Button
                   onClick={handleConnect}
                   disabled={connectLoading || sessionLoading}
@@ -310,17 +355,17 @@ export default function Home() {
                   )}
                   <span className="font-medium">{connectLoading ? "Connecting…" : "Continue with GitHub"}</span>
                 </Button>
-                <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                <p className="my-2 text-center text-[11px] text-muted-foreground">
                   By continuing, you agree to use your GitHub access only to list repos and open PRs on your behalf.
                 </p>
               </div>
             </div>
           </DialogContent>
         </Dialog>
-        <div className="  p-6 sm:p-8 md:p-10 min-h-[75svh] relative">
+        <div className="p-5 sm:p-8 md:p-10 min-h-[75svh] relative">
           {/* Header within bordered container */}
           <div className="flex items-center justify-between">
-            <span className="text-md font-mono flex gap-2 justify-center items-center"><BotIcon/> Coding Agent</span>
+            <span className="text-md font-mono flex gap-2 justify-center items-center"><BotIcon /> Coding Agent</span>
             <button
               onClick={!authed ? handleConnect : undefined}
               disabled={!authed && (connectLoading || sessionLoading)}
@@ -333,7 +378,7 @@ export default function Home() {
           </div>
 
           {/* Centered content */}
-          <div className="mt-10 flex flex-col items-center gap-6">
+          <div className="mt-8 sm:mt-10 flex flex-col items-center gap-6">
             <h2 className="font-serif text-3xl flex justify-center items-center text-center">
               Hi
               {session.data?.user?.name ? (
@@ -347,7 +392,7 @@ export default function Home() {
             </h2>
 
             {/* Select repo pill */}
-            <div className="w-full max-w-xs ">
+            <div className="w-full max-w-xs">
               <Select value={selectedRepo} onValueChange={setSelectedRepo} disabled={!authed || reposLoading}>
                 <SelectTrigger className="rounded-xl bg-black">
                   <SelectValue placeholder={!authed ? "Connect GitHub first" : reposLoading ? "Loading repos…" : repos.length ? "Select Repo" : "No repos found"} />
@@ -364,7 +409,7 @@ export default function Home() {
 
             {/* Large rounded prompt box with run button bottom-right */}
             <div className="relative w-full max-w-2xl">
-              <div className="rounded-[2rem] bg-black border p-4 sm:p-5">
+              <div className="rounded-[2rem] bg-black border p-4 sm:p-5 pb-16 md:pb-5">
                 <Textarea
                   className="min-h-40  resize-y border-0 focus-visible:ring-0 focus:outline-none bg-transparent"
                   placeholder="Describe the change you want to make…"
@@ -372,10 +417,22 @@ export default function Home() {
                   onChange={(e) => setTask(e.target.value)}
                 />
               </div>
-              <div className="absolute bottom-8 right-8">
+              {/* Desktop run button (floating) */}
+              <div className="hidden md:block absolute bottom-8 right-8">
                 <Button
                   variant="outline"
                   className="rounded-full"
+                  onClick={runAgent}
+                  disabled={!canRun || running}
+                >
+                  <Wand2 className="mr-2 h-4 w-4" /> {running ? "running…" : "Run agent"}
+                </Button>
+              </div>
+              {/* Mobile run button (inline) */}
+              <div className="mt-3 md:hidden w-full flex justify-end">
+                <Button
+                  variant="outline"
+                  className="rounded-full w-full"
                   onClick={runAgent}
                   disabled={!canRun || running}
                 >
@@ -595,14 +652,14 @@ function UnifiedDiff({ before, after }: { before: string; after: string }) {
 // Small feature pill for dialog
 function Feature({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <div className="group rounded-2xl border bg-card/60 backdrop-blur px-3.5 py-3.5 transition-colors hover:bg-card">
+    <div className="group rounded-2xl border bg-card/60 backdrop-blur px-4 py-4 transition-colors hover:bg-card shadow-sm hover:shadow-md">
       <div className="flex items-start gap-3.5">
-        <div className="mt-0 flex p-2 h-10 w-10 items-center justify-center rounded-full border bg-background">
+        <div className="mt-0 flex p-2 h-11 w-11 items-center justify-center rounded-full border bg-background/90 ring-1 ring-white/5">
           {icon}
         </div>
         <div>
-          <div className="text-sm font-medium leading-tight">{title}</div>
-          <div className="text-xs text-muted-foreground leading-snug">{desc}</div>
+          <div className="text-sm font-medium leading-tight tracking-tight">{title}</div>
+          <div className="text-xs text-muted-foreground leading-snug mt-0.5">{desc}</div>
         </div>
       </div>
     </div>
