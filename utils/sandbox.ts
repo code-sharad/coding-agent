@@ -3,12 +3,12 @@
 import { Sandbox } from "@vercel/sandbox";
 import ms from "ms";
 
-export const createSandbox = async (repoUrl: string) => {
+export const createSandbox = async (repoUrl: string, accessToken: { email: string; token: string }) => {
   let authenticatedUrl = repoUrl;
-  if (process.env.GITHUB_TOKEN && repoUrl.includes("github.com")) {
+  if (accessToken && repoUrl.includes("github.com")) {
     authenticatedUrl = repoUrl.replace(
       "https://github.com/",
-      `https://${process.env.GITHUB_TOKEN}@github.com/`
+      `https://${accessToken.token}@github.com/`
     );
   }
   const sandbox = await Sandbox.create({
@@ -122,11 +122,12 @@ export const editFile = async (
 
 export const createPR = async (
   sandbox: Sandbox,
+  accessToken: { email: string; token: string },
   repoUrl: string,
   prDetails: { title: string; body: string; branch: string | null },
 ) => {
   try {
-    if (!process.env.GITHUB_TOKEN)
+    if (!accessToken)
       throw new Error("GITHUB_TOKEN environment variable is required");
 
     const { title, body, branch } = prDetails;
@@ -138,13 +139,13 @@ export const createPR = async (
     await sandbox.runCommand("git", [
       "config",
       "user.email",
-      "codesharad@gmail.com",
+      accessToken.email,
     ]);
     await sandbox.runCommand("git", ["config", "user.name", "AI Coding Agent"]);
 
     const authUrl = repoUrl!.replace(
       "https://github.com/",
-      `https://${process.env.GITHUB_TOKEN}@github.com/`,
+      `https://${accessToken.token}@github.com/`,
     );
     await sandbox.runCommand("git", ["remote", "set-url", "origin", authUrl]);
 
@@ -207,7 +208,7 @@ export const createPR = async (
       "-X",
       "POST",
       "-H",
-      `Authorization: token ${process.env.GITHUB_TOKEN}`,
+      `Authorization: token ${accessToken.token}`,
       "-H",
       "Accept: application/vnd.github.v3+json",
       "-H",

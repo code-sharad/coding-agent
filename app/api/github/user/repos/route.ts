@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { db } from "@/db/client";
-import { eq } from "drizzle-orm";
+import { getGithubAccessToken } from "@/db/users";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,12 +14,8 @@ export async function GET(request: NextRequest) {
     let token: string | undefined;
     try {
       const sessionRes = await auth.api.getSession({ headers: request.headers, asResponse: false });
-      // @ts-expect-error remove the error
-      const account = await db.select().from("account").where(eq(sessionRes?.user.id, "userId"));
-      console.log(account);
       // type Sess = { session?: { accessToken?: string } };
-      // token = (sessionRes as Sess)?.session?.accessToken;
-
+      token = await getGithubAccessToken(sessionRes?.user.id as string) as string;
     } catch { }
 
     // Fallback to server PAT if user token missing

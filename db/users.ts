@@ -1,6 +1,8 @@
 import { db } from "./client";
 import { eq } from "drizzle-orm";
 import { users } from "./schema";
+import { account } from "./drizzle/schema";
+import { Account } from "better-auth";
 
 export async function upsertUser(input: {
   email: string;
@@ -39,4 +41,9 @@ export async function upsertUser(input: {
     })
     .returning();
   return insertedArr[0];
+}
+
+export async function getGithubAccessToken(userId: string) {
+  const accArr = await db.select().from(account).where(eq(account.userId, userId));
+  return accArr[0]?.accessToken;
 }

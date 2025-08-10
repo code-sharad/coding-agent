@@ -9,9 +9,11 @@ import {
   readFile,
 } from "./sandbox";
 
+type TypeAccessToken = { email: string; token: string };
 export async function codingAgent(
   prompt: string,
   repoUrl?: string,
+  accArr?: TypeAccessToken,
   onLog?: (message: unknown) => void
 ) {
   const log = (message: unknown) => {
@@ -47,7 +49,7 @@ export async function codingAgent(
           try {
             if (!sandbox) {
               log("📦 Creating sandbox...");
-              sandbox = await createSandbox(repoUrl!);
+              sandbox = await createSandbox(repoUrl!, accArr as TypeAccessToken);
               log("✅ Sandbox ready");
             }
             log(`📖 Reading file: ${path}`);
@@ -81,7 +83,7 @@ export async function codingAgent(
           try {
             if (!sandbox) {
               log("📦 Creating sandbox...");
-              sandbox = await createSandbox(repoUrl!);
+              sandbox = await createSandbox(repoUrl!, accArr as TypeAccessToken);
               log("✅ Sandbox ready");
             }
             log(`📁 Listing files in: ${path ?? "."}`);
@@ -115,7 +117,7 @@ export async function codingAgent(
           try {
             if (!sandbox) {
               log("📦 Creating sandbox...");
-              sandbox = await createSandbox(repoUrl!);
+              sandbox = await createSandbox(repoUrl!, accArr as TypeAccessToken);
               log("✅ Sandbox ready");
             }
             log(`✏️ Editing file: ${path}`);
@@ -157,10 +159,11 @@ export async function codingAgent(
           log(`🚀 Creating pull request: "${title}"`);
           log(`📝 Branch: ${branch ?? "auto-generated"}`);
           try {
-            const result = await createPR(sandbox!, repoUrl!, {
+            const result = await createPR(sandbox!, accArr as TypeAccessToken, repoUrl!, {
               title,
               body,
               branch,
+
             });
             if (result.pr_url) {
               log(`✅ Pull request created successfully!`);

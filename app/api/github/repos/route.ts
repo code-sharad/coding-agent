@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { getGithubAccessToken } from "@/db/users";
 
 // Minimal GitHub repo type
 interface Repo {
@@ -19,17 +20,18 @@ export async function GET(request: Request) {
   // Try to read session using Better Auth API (Next.js route)
   let token: string | undefined;
   try {
-    const sessionRes = (await auth.api.getSession({
+    const sessionRes = await auth.api.getSession({
       headers: request.headers,
       asResponse: false,
-    })) as unknown as SessionResult | null;
-    token = sessionRes?.session?.accessToken;
+    })
+
+    token = await getGithubAccessToken(sessionRes?.user.id as string) as string;
   } catch {
     // ignore and fallback below
   }
 
   // Fallback to env token for server-side operations if user token is unavailable
-  if (!token) token = process.env.GITHUB_TOKEN;
+  // if (!token) token = process.env.GITHUB_TOKEN;
   if (!token) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
