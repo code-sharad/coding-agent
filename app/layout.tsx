@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Noto_Serif, Playfair_Display } from "next/font/google";
-import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
 
+import "./globals.css";
 const geistSans = Inter({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -44,6 +45,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${serif.variable} ${usernameFont.variable} antialiased`}
        >
         {children}
+        <Analytics />
       </body>
     </html>
   );
