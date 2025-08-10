@@ -317,7 +317,7 @@ export default function Home() {
             </div>
           </DialogContent>
         </Dialog>
-        <div className=" md:border bg-black/10 p-6 sm:p-8 md:p-10 min-h-[75svh] relative">
+        <div className="  p-6 sm:p-8 md:p-10 min-h-[75svh] relative">
           {/* Header within bordered container */}
           <div className="flex items-center justify-between">
             <span className="text-md font-mono">Coding Agent</span>
