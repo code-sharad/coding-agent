@@ -285,7 +285,7 @@ export default function Home() {
         >
           <DialogContent
             hideClose
-            className="sm:max-w-xl md:max-w-2xl p-0 overflow-hidden rounded-3xl border-0 shadow-2xl max-h-[85svh] sm:max-h-[80svh] flex flex-col"
+            className="sm:max-w-xl max-w-[290px]  md:max-w-2xl p-0 overflow-hidden rounded-3xl border-0 shadow-2xl max-h-[85svh] sm:max-h-[80svh] flex flex-col"
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
