@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { Github, Play, Wand2 } from "lucide-react";
+import { Github, Play, Wand2, ShieldCheck, GitBranch, GitPullRequest, FileCode, Terminal, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
 
@@ -240,33 +240,84 @@ export default function Home() {
 
   return (
     <div className="min-h-svh bg-background">
-      <div className="mx-auto max-w-7xl px-5 py-8">
+      <SubtleGridBackground />
+      <div className="mx-auto max-w-7xl px-5 py-8 relative z-10">
         <Dialog
           open={showConnect}
           onOpenChange={(open) => (authed ? setShowConnect(open) : setShowConnect(true))}
         >
           <DialogContent
             hideClose
-            className="sm:max-w-xl md:max-w-2xl rounded-2xl"
+            className="sm:max-w-xl md:max-w-2xl p-0 overflow-hidden rounded-3xl border-0 shadow-2xl"
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
-            <DialogHeader>
-              <DialogTitle className="font-serif text-2xl sm:text-3xl">Connect your GitHub</DialogTitle>
-              <DialogDescription className="text-base">
-                Sign in to GitHub to list your repositories and let the agent propose fixes and features.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-5">
-              <Button onClick={handleConnect} disabled={connectLoading || sessionLoading} aria-busy={connectLoading}
-                size="lg" className="w-full h-11 ">
-                <Github className="mr-2 h-4 w-4" /> Continue with GitHub
-              </Button>
+            <div className="relative isolate">
+              {/* Soft gradient background */}
+              <div className="pointer-events-none absolute inset-0 opacity-70">
+                <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-indigo-500/40 via-violet-500/30 to-cyan-400/30 blur-3xl" />
+                <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-gradient-to-tr from-cyan-400/30 via-emerald-400/30 to-indigo-500/30 blur-3xl" />
+              </div>
 
+              {/* Header */}
+              <div className="relative z-10 px-6 pt-6 pb-3 sm:px-8">
+                <div className="inline-flex items-center gap-2 rounded-full border bg-white/5 px-3 py-1 text-xs text-foreground/80 backdrop-blur">
+                  <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  AI-powered Code Agent
+                </div>
+                <DialogHeader>
+                  <DialogTitle className="mt-3 font-serif text-3xl sm:text-4xl leading-tight">
+                    <span className="bg-gradient-to-r from-white to-neutral-300 bg-clip-text text-transparent">
+                      Build smarter with GitHub
+                    </span>
+                  </DialogTitle>
+                  <DialogDescription className="mt-2 text-base text-muted-foreground">
+                    Connect your GitHub to let the agent explore your repo, propose changes, and open PRs — all with live logs and safety.
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
+
+              {/* Features */}
+              <div className="relative z-10 px-6 pb-4 sm:px-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Feature icon={<FileCode className="h-6 w-6" />} title="Repo-aware edits" desc="Reads your code and suggests precise changes." />
+                  <Feature icon={<Terminal className="h-6 w-6" />} title="Live logs" desc="Streamed output and status as it works." />
+                  <Feature icon={<GitBranch className="h-6 w-6" />} title="Sandboxed changes" desc="Isolated env; no local mess-ups." />
+                  <Feature icon={<GitPullRequest className="h-6 w-6" />} title="Auto PRs" desc="Commits, pushes, and opens PRs for you." />
+                  <Feature icon={<ShieldCheck className="h-6 w-6" />} title="Private-safe" desc="Per-user tokens; your access stays yours." />
+                  <Feature icon={<Rocket className="h-6 w-6" />} title="Fast start" desc="Pick a repo, describe a task, run." />
+                </div>
+              </div>
+
+              {/* Sticky footer */}
+              <div className="z-10 sticky bottom-0 -mb-px border-t bg-background/80 backdrop-blur px-6 py-4 sm:px-8">
+                <Button
+                  onClick={handleConnect}
+                  disabled={connectLoading || sessionLoading}
+                  aria-busy={connectLoading}
+                  size="lg"
+                  className="w-full h-11 rounded-xl relative overflow-hidden border bg-[#0d1117] text-[#c9d1d9] hover:bg-[#161b22] transition-colors"
+                >
+                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none" aria-hidden>
+                    {/* subtle light sheen on hover */}
+                  </span>
+                  {connectLoading ? (
+                    <span className="mr-2 inline-flex h-4 w-4 items-center justify-center">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#8b949e] border-t-transparent" />
+                    </span>
+                  ) : (
+                    <Github className="mr-2 h-4 w-4" />
+                  )}
+                  <span className="font-medium">{connectLoading ? "Connecting…" : "Continue with GitHub"}</span>
+                </Button>
+                <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                  By continuing, you agree to use your GitHub access only to list repos and open PRs on your behalf.
+                </p>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
-        <div className=" border p-6 sm:p-8 md:p-10 min-h-[75svh] relative">
+        <div className=" border bg-black p-6 sm:p-8 md:p-10 min-h-[75svh] relative">
           {/* Header within bordered container */}
           <div className="flex items-center justify-between">
             <span className="text-md font-mono">Coding Agent</span>
@@ -417,6 +468,26 @@ export default function Home() {
   );
 }
 
+// Fixed, subtle grid/dots background
+function SubtleGridBackground() {
+  const style: React.CSSProperties = {
+    backgroundImage:
+      `linear-gradient(to right, rgba(120,120,128,0.06) 1px, transparent 1px),` +
+      `linear-gradient(to bottom, rgba(120,120,128,0.06) 1px, transparent 1px)`,
+    backgroundSize: "24px 24px",
+    backgroundPosition: "0 0",
+    WebkitMaskImage: "radial-gradient(120% 80% at 50% 20%, black 60%, transparent 100%)",
+    maskImage: "radial-gradient(120% 80% at 50% 20%, black 60%, transparent 100%)",
+  };
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-0"
+      style={style}
+    />
+  );
+}
+
 // --- Minimal unified diff (line-based) with small context, styled GitHub-dark-ish ---
 type DiffOp = { type: 'context' | 'add' | 'remove'; line: string };
 function lcsDiff(a: string[], b: string[]): DiffOp[] {
@@ -517,6 +588,23 @@ function UnifiedDiff({ before, after }: { before: string; after: string }) {
           </pre>
         </div>
       ))}
+    </div>
+  );
+}
+
+// Small feature pill for dialog
+function Feature({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
+  return (
+    <div className="group rounded-2xl border bg-card/60 backdrop-blur px-3.5 py-3.5 transition-colors hover:bg-card">
+      <div className="flex items-start gap-3.5">
+        <div className="mt-0 flex p-2 h-10 w-10 items-center justify-center rounded-full border bg-background">
+          {icon}
+        </div>
+        <div>
+          <div className="text-sm font-medium leading-tight">{title}</div>
+          <div className="text-xs text-muted-foreground leading-snug">{desc}</div>
+        </div>
+      </div>
     </div>
   );
 }
