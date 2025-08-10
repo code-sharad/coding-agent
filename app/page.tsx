@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { Github, Play, Wand2, ShieldCheck, GitBranch, GitPullRequest, FileCode, Terminal, Rocket } from "lucide-react";
+import { Github, Play, Wand2, ShieldCheck, GitBranch, GitPullRequest, FileCode, Terminal, Rocket, BotIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
 
@@ -320,7 +320,7 @@ export default function Home() {
         <div className="  p-6 sm:p-8 md:p-10 min-h-[75svh] relative">
           {/* Header within bordered container */}
           <div className="flex items-center justify-between">
-            <span className="text-md font-mono">Coding Agent</span>
+            <span className="text-md font-mono flex gap-2 justify-center items-center"><BotIcon/> Coding Agent</span>
             <button
               onClick={!authed ? handleConnect : undefined}
               disabled={!authed && (connectLoading || sessionLoading)}
