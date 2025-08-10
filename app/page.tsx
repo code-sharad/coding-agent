@@ -279,7 +279,7 @@ export default function Home() {
 
               {/* Features */}
               <div className="relative z-10 px-6 pb-4 sm:px-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                   <Feature icon={<FileCode className="h-6 w-6" />} title="Repo-aware edits" desc="Reads your code and suggests precise changes." />
                   <Feature icon={<Terminal className="h-6 w-6" />} title="Live logs" desc="Streamed output and status as it works." />
                   <Feature icon={<GitBranch className="h-6 w-6" />} title="Sandboxed changes" desc="Isolated env; no local mess-ups." />
@@ -296,7 +296,7 @@ export default function Home() {
                   disabled={connectLoading || sessionLoading}
                   aria-busy={connectLoading}
                   size="lg"
-                  className="w-full h-11 rounded-xl relative overflow-hidden border bg-[#0d1117] text-[#c9d1d9] hover:bg-[#161b22] transition-colors"
+                  className="w-full h-14 rounded-xl relative overflow-hidden border bg-[#0d1117] text-[#c9d1d9] hover:bg-[#161b22] transition-colors"
                 >
                   <span className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none" aria-hidden>
                     {/* subtle light sheen on hover */}
@@ -317,7 +317,7 @@ export default function Home() {
             </div>
           </DialogContent>
         </Dialog>
-        <div className=" border bg-black p-6 sm:p-8 md:p-10 min-h-[75svh] relative">
+        <div className=" md:border bg-black/10 p-6 sm:p-8 md:p-10 min-h-[75svh] relative">
           {/* Header within bordered container */}
           <div className="flex items-center justify-between">
             <span className="text-md font-mono">Coding Agent</span>
@@ -347,9 +347,9 @@ export default function Home() {
             </h2>
 
             {/* Select repo pill */}
-            <div className="w-full max-w-xs">
+            <div className="w-full max-w-xs ">
               <Select value={selectedRepo} onValueChange={setSelectedRepo} disabled={!authed || reposLoading}>
-                <SelectTrigger className="rounded-xl">
+                <SelectTrigger className="rounded-xl bg-black">
                   <SelectValue placeholder={!authed ? "Connect GitHub first" : reposLoading ? "Loading repos…" : repos.length ? "Select Repo" : "No repos found"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -364,7 +364,7 @@ export default function Home() {
 
             {/* Large rounded prompt box with run button bottom-right */}
             <div className="relative w-full max-w-2xl">
-              <div className="rounded-[2rem] border p-4 sm:p-5">
+              <div className="rounded-[2rem] bg-black border p-4 sm:p-5">
                 <Textarea
                   className="min-h-40  resize-y border-0 focus-visible:ring-0 focus:outline-none bg-transparent"
                   placeholder="Describe the change you want to make…"
@@ -393,7 +393,7 @@ export default function Home() {
                   <span className="ml-auto tabular-nums">{progress}%</span>
                 </div>
                 {pr && (
-                  <div className="mt-2 rounded-md border bg-[#0d1117] text-[#c9d1d9] p-3 flex items-center justify-between">
+                  <div className="mt-2 rounded-md border bg-[#0d1117] text-[#c9d1d9] p-3 flex flex-col md:flex-row gap-2 items-start md:items-center justify-between">
                     <div className="text-sm">Pull request created{pr.branch ? ` on ${pr.branch}` : ""}.</div>
                     <a
                       className=""
@@ -401,7 +401,7 @@ export default function Home() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <Button variant="outline" className=" text-xs  decoration-dotted text-[#7ee787] hover:cursor-pointer hover:text-[#56d364]">Open Pull Request →</Button>
+                      <Button variant="outline" className="text-xs  decoration-dotted text-[#7ee787] hover:cursor-pointer hover:text-[#56d364]">Open Pull Request →</Button>
                     </a>
                   </div>
                 )}
