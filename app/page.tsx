@@ -15,6 +15,7 @@ import confetti from "canvas-confetti";
 
 import AutoScroll from "embla-carousel-auto-scroll";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousal";
+import Link from "next/link";
 
 type Repo = { id: number; full_name: string };
 type FileListEvent = { path: string; output: string };
@@ -276,7 +277,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-svh bg-background">
+    <div className="relative min-h-svh bg-background">
       <SubtleGridBackground />
       <div className="mx-auto max-w-7xl px-5 py-8 relative z-10">
         <Dialog
@@ -298,7 +299,7 @@ export default function Home() {
 
               {/* Header */}
               <div className="relative z-10 flex-1 overflow-y-auto px-0 pt-6 pb-2 sm:px-0">
-               <div className="px-6 text-center md:text-left">
+                <div className="px-6 text-center md:text-left">
                   <div className="inline-flex items-center  gap-2 rounded-full border bg-white/5 px-3 py-1 text-xs text-foreground/80 backdrop-blur">
                     <span className="inline-flex  h-1.5 w-1.5 rounded-full bg-emerald-400" />
                     AI-powered Code Agent
@@ -520,6 +521,12 @@ export default function Home() {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="absolute inset-x-0 bottom-3 z-20 flex items-center justify-center px-4">
+        <p className="text-xs sm:text-sm text-muted-foreground">
+          Designed and developed by <Link href="https://iamsharad.in" target="_blank" className="font-medium text-foreground cursor-pointer">Sharad Bhadait</Link>
+        </p>
       </div>
     </div>
   );
