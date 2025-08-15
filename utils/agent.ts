@@ -9,7 +9,11 @@ import {
   readFile,
 } from "./sandbox";
 
-import { deepseek } from '@ai-sdk/deepseek';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+
+const openrouter = createOpenRouter({
+  apiKey: process.env.OPENROUTER_API_KEY,
+});
 
 type TypeAccessToken = { email: string; token: string };
 export async function codingAgent(
@@ -33,7 +37,7 @@ export async function codingAgent(
   let sandbox: Sandbox | undefined;
 
   const result = await generateText({
-    model: deepseek("deepseek-chat"),
+    model: openrouter.chat('moonshotai/kimi-k2'),
     prompt,
     system:
       "You are a coding agent. You will be working with js/ts projects. Your responses must be concise. If you make changes to the codebase, be sure to run the create_pr tool once you are done.",
