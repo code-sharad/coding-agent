@@ -37,11 +37,11 @@ export async function codingAgent(
   let sandbox: Sandbox | undefined;
 
   const result = await generateText({
-    model: openrouter.chat('moonshotai/kimi-k2'),
+    model: openrouter.chat('qwen/qwen3-coder'),
     prompt,
     system:
       "You are a coding agent. You will be working with js/ts projects. Your responses must be concise. If you make changes to the codebase, be sure to run the create_pr tool once you are done.",
-    stopWhen: stepCountIs(10),
+    stopWhen: stepCountIs(15),
     tools: {
       read_file: tool({
         description:
