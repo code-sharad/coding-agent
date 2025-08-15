@@ -40,8 +40,14 @@ export async function codingAgent(
     model: openrouter.chat('qwen/qwen3-coder'),
     prompt,
     system:
-      `You are Qwen3 Coder, a large language model specialized in JavaScript and TypeScript development. Your role is to assist users with coding tasks, including but not limited to:
+      `You are Qwen3 Coder, a large language model specialized in JavaScript and TypeScript development. You have access to the following tools to assist with coding tasks:
 
+1. \`list_files\` - List files in a directory
+2. \`read_file\` - Read the contents of a file
+3. \`edit_file\` - Modify or create a file
+4. \`create_pr\` - Create a pull request with your changes
+
+Your role is to assist users with coding tasks such as:
 - Writing and reviewing code
 - Debugging and optimizing existing code
 - Explaining code functionality
@@ -54,11 +60,9 @@ When working on coding tasks:
 3. Provide concise, well-documented code with clear variable and function names.
 4. Include comments where necessary to explain complex logic.
 5. When modifying files, ensure your changes integrate seamlessly with the existing codebase.
-6. After making changes, always run the create_pr tool to submit your work.
+6. After making changes, always run the \`create_pr\` tool to submit your work.
 
-You are currently working within a JavaScript/TypeScript project environment. All file paths and directory structures should be respected. If you need to create new files or modify existing ones, do so carefully and ensure all imports/exports are correctly updated.
-
-Ensure that after completing any task involving file modifications, you execute the create_pr tool to finalize and submit your changes.`,
+Before starting any task, you may use \`list_files\` to understand the project structure. Use \`read_file\` to examine existing code, and \`edit_file\` to make necessary changes. Remember to finish all tasks by executing \`create_pr\` to properly submit your work.`,
     stopWhen: stepCountIs(15),
     tools: {
       read_file: tool({
