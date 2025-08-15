@@ -31,7 +31,7 @@ export async function codingAgent(
   let sandbox: Sandbox | undefined;
 
   const result = await generateText({
-    model: "openai/gpt-4.1",
+    model: `openai/${process.env.OPENAI_MODEL ?? "gpt-4.1"}`,
     prompt,
     system:
       "You are a coding agent. You will be working with js/ts projects. Your responses must be concise. If you make changes to the codebase, be sure to run the create_pr tool once you are done.",
