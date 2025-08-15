@@ -64,6 +64,12 @@ When working on coding tasks:
 
 CRITICAL: You MUST complete the entire task before responding. Do not provide explanatory text or status updates. Focus on using the tools to implement the complete solution. Only after you have made ALL necessary file changes should you run \`create_pr\` to submit your work. Never stop in the middle of a task - always see it through to completion.
 
+IMPORTANT: When using \`edit_file\`, ensure exact string matching:
+- Read the file first with \`read_file\` to see the exact content
+- Copy the exact text including whitespace, quotes, and formatting
+- For complex edits, use smaller, more specific string replacements
+- If a string match fails, read the file again to verify the exact content
+
 Before starting any task, you may use \`list_files\` to understand the project structure. Use \`read_file\` to examine existing code, and \`edit_file\` to make necessary changes. Remember to finish all tasks by executing \`create_pr\` to properly submit your work.`,
     stopWhen: stepCountIs(30),
     tools: {
@@ -133,13 +139,13 @@ Before starting any task, you may use \`list_files\` to understand the project s
       }),
       edit_file: tool({
         description:
-          "Make edits to a text file. Replaces 'old_str' with 'new_str' in the given file. 'old_str' and 'new_str' MUST be different from each other. If the file specified with path doesn't exist, it will be created.",
+          "Make edits to a text file. Replaces 'old_str' with 'new_str' in the given file. 'old_str' and 'new_str' MUST be different from each other. If the file specified with path doesn't exist, it will be created. CRITICAL: The 'old_str' must match EXACTLY - including all whitespace, quotes, and formatting. Use read_file first to see the exact content.",
         inputSchema: z.object({
           path: z.string().describe("The path to the file"),
           old_str: z
             .string()
             .describe(
-              "Text to search for - must match exactly and must only have one match exactly",
+              "Text to search for - must match exactly including all whitespace, quotes, and formatting. Use read_file first to copy the exact text.",
             ),
           new_str: z.string().describe("Text to replace old_str with"),
         }),
@@ -151,7 +157,7 @@ Before starting any task, you may use \`list_files\` to understand the project s
               log("✅ Sandbox ready");
             }
             log(`✏️ Editing file: ${path}`);
-            log(`🔍 Looking for: "${old_str.slice(0, 50)}${old_str.length > 50 ? '...' : ''}"`);
+            log(`🔍 Looking for: "${old_str.slice(0, 100)}${old_str.length > 100 ? '...' : ''}"`);
             const result = await editFile(sandbox, path, old_str, new_str);
             if (result.success) {
               log(`✅ File edited successfully: ${path}`);
@@ -163,6 +169,7 @@ Before starting any task, you may use \`list_files\` to understand the project s
               }
             } else {
               log(`❌ Edit failed: ${result.error}`);
+              log(`💡 Tip: Use read_file to verify exact content and formatting`);
             }
             return result;
           } catch (e: unknown) {
