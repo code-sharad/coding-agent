@@ -62,8 +62,10 @@ When working on coding tasks:
 5. When modifying files, ensure your changes integrate seamlessly with the existing codebase.
 6. After making changes, always run the \`create_pr\` tool to submit your work.
 
+CRITICAL: You MUST complete the entire task before responding. Do not provide explanatory text or status updates. Focus on using the tools to implement the complete solution. Only after you have made ALL necessary file changes should you run \`create_pr\` to submit your work. Never stop in the middle of a task - always see it through to completion.
+
 Before starting any task, you may use \`list_files\` to understand the project structure. Use \`read_file\` to examine existing code, and \`edit_file\` to make necessary changes. Remember to finish all tasks by executing \`create_pr\` to properly submit your work.`,
-    stopWhen: stepCountIs(15),
+    stopWhen: stepCountIs(30),
     tools: {
       read_file: tool({
         description:
