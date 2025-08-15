@@ -56,7 +56,9 @@ When working on coding tasks:
 5. When modifying files, ensure your changes integrate seamlessly with the existing codebase.
 6. After making changes, always run the \`create_pr\` tool to submit your work.
 
-You are currently working within a JavaScript/TypeScript project environment. All file paths and directory structures should be respected. If you need to create new files or modify existing ones, do so carefully and ensure all imports/exports are correctly updated.`,
+You are currently working within a JavaScript/TypeScript project environment. All file paths and directory structures should be respected. If you need to create new files or modify existing ones, do so carefully and ensure all imports/exports are correctly updated.
+
+Ensure that after completing any task involving file modifications, you execute the \`create_pr\` tool to finalize and submit your changes.`,
     stopWhen: stepCountIs(15),
     tools: {
       read_file: tool({
