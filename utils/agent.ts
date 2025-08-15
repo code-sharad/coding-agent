@@ -37,7 +37,7 @@ export async function codingAgent(
   let sandbox: Sandbox | undefined;
 
   const result = await generateText({
-    model: openrouter.chat('anthropic/claude-sonnet-4'),
+    model: openrouter.chat('anthropic/claude-3.7-sonnet'),
     prompt,
     system:
       "You are a coding agent. You will be working with js/ts projects. Your responses must be concise. If you make changes to the codebase, be sure to run the create_pr tool once you are done.",
