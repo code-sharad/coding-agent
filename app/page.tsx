@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { Github, Play, Wand2, ShieldCheck, GitBranch, GitPullRequest, FileCode, Terminal, Rocket, BotIcon } from "lucide-react";
+import { Github, Play, Wand2, ShieldCheck, GitBranch, GitPullRequest, FileCode, Terminal, Rocket, BotIcon, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
 
@@ -81,6 +81,7 @@ export default function Home() {
   const [fileDiffs, setFileDiffs] = useState<FileDiffEvent[]>([]);
   const [pr, setPr] = useState<PRCreatedEvent | null>(null);
   const [view, setView] = useState<"logs" | "files" | "diffs">("logs");
+  const [isProgressExpanded, setIsProgressExpanded] = useState(false);
   const [showConnect, setShowConnect] = useState(false);
   const [reposLoading, setReposLoading] = useState(false);
   const [connectLoading, setConnectLoading] = useState(false);
@@ -151,6 +152,28 @@ export default function Home() {
       frame();
     }
   }, [pr]);
+
+  // Keyboard handler for closing expanded progress section
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isProgressExpanded) {
+        setIsProgressExpanded(false);
+      }
+    };
+
+    if (isProgressExpanded) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Prevent body scroll when expanded
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isProgressExpanded]);
 
   const runAgent = async () => {
     setRunning(true);
@@ -444,81 +467,103 @@ export default function Home() {
 
             {/* Progress underneath when running */}
             {(running || logs.length > 0 || fileLists.length > 0 || fileDiffs.length > 0) && (
-              <div className="w-full max-w-2xl mt-8">
-                <div className="flex items-center gap-2 text-sm">
-                  <Play className="h-4 w-4 opacity-70" />
-                  <span>{running ? "Working…" : progress === 100 ? "Completed" : "Idle"}</span>
-                  <span className="ml-auto tabular-nums">{progress}%</span>
-                </div>
-                {pr && (
-                  <div className="mt-2 rounded-md border bg-[#0d1117] text-[#c9d1d9] p-3 flex flex-col md:flex-row gap-2 items-start md:items-center justify-between">
-                    <div className="text-sm">Pull request created{pr.branch ? ` on ${pr.branch}` : ""}.</div>
-                    <a
-                      className=""
-                      href={pr.url}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <Button variant="outline" className="text-xs  decoration-dotted text-[#7ee787] hover:cursor-pointer hover:text-[#56d364]">Open Pull Request →</Button>
-                    </a>
-                  </div>
-                )}
-                {pr?.branch ? "" : <Progress value={progress} className="mt-2" />}
+              <>
+                {/* Backdrop overlay */}
+                <div className={`progress-backdrop ${isProgressExpanded ? 'progress-backdrop-visible' : ''}`} onClick={() => setIsProgressExpanded(false)} />
 
-                {/* View switcher */}
-                <div className="mt-3 flex items-center gap-2 text-xs">
-                  <button className={`px-3 py-1 rounded-full border ${view === "logs" ? "bg-primary text-primary-foreground" : "bg-muted"}`} onClick={() => setView("logs")}>Logs</button>
-                  <button className={`px-3 py-1 rounded-full border ${view === "files" ? "bg-primary text-primary-foreground" : "bg-muted"}`} onClick={() => setView("files")}>Files</button>
-                  <button className={`px-3 py-1 rounded-full border ${view === "diffs" ? "bg-primary text-primary-foreground" : "bg-muted"}`} onClick={() => setView("diffs")}>Diffs</button>
+                <div className={`progress-section ${isProgressExpanded ? 'progress-section-expanded' : 'progress-section-normal w-full max-w-2xl mt-8'}`}>
+                  <div className={`progress-content ${isProgressExpanded ? 'progress-content-expanded' : 'progress-content-normal'}`}>
+                    {/* Header with expand/minimize button */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Play className="h-4 w-4 opacity-70" />
+                        <span>{running ? "Working…" : progress === 100 ? "Completed" : "Idle"}</span>
+                        <span className="ml-auto tabular-nums">{progress}%</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsProgressExpanded(!isProgressExpanded)}
+                        className="h-8 w-8 p-0 hover:bg-muted/50 transition-colors"
+                      >
+                        {isProgressExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    {pr && (
+                      <div className="mt-2 rounded-md border bg-[#0d1117] text-[#c9d1d9] p-3 flex flex-col md:flex-row gap-2 items-start md:items-center justify-between">
+                        <div className="text-sm">Pull request created{pr.branch ? ` on ${pr.branch}` : ""}.</div>
+                        <a
+                          className=""
+                          href={pr.url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <Button variant="outline" className="text-xs  decoration-dotted text-[#7ee787] hover:cursor-pointer hover:text-[#56d364]">Open Pull Request →</Button>
+                        </a>
+                      </div>
+                    )}
+                    {pr?.branch ? "" : <Progress value={progress} className="mt-2" />}
+
+                    {/* View switcher */}
+                    <div className={`mt-3 flex items-center gap-2 ${isProgressExpanded ? 'text-sm' : 'text-xs'}`}>
+                      <button className={`px-3 py-1 rounded-full border transition-all duration-200 hover:scale-105 ${view === "logs" ? "bg-primary text-primary-foreground" : "bg-muted"}`} onClick={() => setView("logs")}>Logs</button>
+                      <button className={`px-3 py-1 rounded-full border transition-all duration-200 hover:scale-105 ${view === "files" ? "bg-primary text-primary-foreground" : "bg-muted"}`} onClick={() => setView("files")}>Files</button>
+                      <button className={`px-3 py-1 rounded-full border transition-all duration-200 hover:scale-105 ${view === "diffs" ? "bg-primary text-primary-foreground" : "bg-muted"}`} onClick={() => setView("diffs")}>Diffs</button>
+                    </div>
+
+                    {/* Panels */}
+                    {view === "logs" && (
+                      <div ref={logRef} className="rounded-md border bg-card mt-3 transition-all duration-300">
+                        <ScrollArea className={`p-3 transition-all duration-300 ${isProgressExpanded ? 'progress-scroll-expanded' : 'progress-scroll-normal'}`}>
+                          <pre className={`font-mono leading-relaxed whitespace-pre-wrap transition-all duration-200 ${isProgressExpanded ? 'text-sm' : 'text-xs'}`}>
+                            {logs.join("\n") || "Logs will appear here when the agent runs."}
+                          </pre>
+                        </ScrollArea>
+                      </div>
+                    )}
+                    {view === "files" && (
+                      <div className="rounded-md border bg-card mt-3 transition-all duration-300">
+                        <ScrollArea className={`p-0 transition-all duration-300 ${isProgressExpanded ? 'progress-scroll-expanded' : 'progress-scroll-normal'}`}>
+                          {fileLists.length === 0 ? (
+                            <div className={`p-3 text-muted-foreground transition-all duration-200 ${isProgressExpanded ? 'text-sm' : 'text-xs'}`}>No directories listed yet.</div>
+                          ) : (
+                            <ul className="divide-y">
+                              {fileLists.map((f, i) => (
+                                <li key={i} className="p-3 transition-all duration-200 hover:bg-muted/50">
+                                  <div className={`text-muted-foreground transition-all duration-200 ${isProgressExpanded ? 'text-sm' : 'text-xs'}`}>{f.path}</div>
+                                  <pre className={`font-mono leading-relaxed whitespace-pre-wrap mt-1 transition-all duration-200 ${isProgressExpanded ? 'text-sm' : 'text-xs'}`}>{f.output}</pre>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </ScrollArea>
+                      </div>
+                    )}
+                    {view === "diffs" && (
+                      <div className="rounded-md border bg-card mt-3 transition-all duration-300">
+                        <ScrollArea className={`p-0 transition-all duration-300 ${isProgressExpanded ? 'progress-scroll-expanded' : 'progress-scroll-normal'}`}>
+                          {fileDiffs.length === 0 ? (
+                            <div className={`p-3 text-muted-foreground transition-all duration-200 ${isProgressExpanded ? 'text-sm' : 'text-xs'}`}>No file edits yet.</div>
+                          ) : (
+                            <ul className="divide-y">
+                              {fileDiffs.map((d, i) => (
+                                <li key={i} className="p-3 space-y-2 transition-all duration-200 hover:bg-muted/50">
+                                  <div className={`text-muted-foreground transition-all duration-200 ${isProgressExpanded ? 'text-sm' : 'text-xs'}`}>{d.path}</div>
+                                  <UnifiedDiff before={d.before} after={d.after} />
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </ScrollArea>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {/* Panels */}
-                {view === "logs" && (
-                  <div ref={logRef} className="rounded-md border bg-card mt-3">
-                    <ScrollArea className="h-64 p-3">
-                      <pre className="font-mono text-xs leading-relaxed whitespace-pre-wrap">
-                        {logs.join("\n") || "Logs will appear here when the agent runs."}
-                      </pre>
-                    </ScrollArea>
-                  </div>
-                )}
-                {view === "files" && (
-                  <div className="rounded-md border bg-card mt-3">
-                    <ScrollArea className="h-64 p-0">
-                      {fileLists.length === 0 ? (
-                        <div className="p-3 text-xs text-muted-foreground">No directories listed yet.</div>
-                      ) : (
-                        <ul className="divide-y">
-                          {fileLists.map((f, i) => (
-                            <li key={i} className="p-3">
-                              <div className="text-xs text-muted-foreground">{f.path}</div>
-                              <pre className="font-mono text-xs leading-relaxed whitespace-pre-wrap mt-1">{f.output}</pre>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </ScrollArea>
-                  </div>
-                )}
-                {view === "diffs" && (
-                  <div className="rounded-md border bg-card mt-3">
-                    <ScrollArea className="h-64 p-0">
-                      {fileDiffs.length === 0 ? (
-                        <div className="p-3 text-xs text-muted-foreground">No file edits yet.</div>
-                      ) : (
-                        <ul className="divide-y">
-                          {fileDiffs.map((d, i) => (
-                            <li key={i} className="p-3 space-y-2">
-                              <div className="text-xs text-muted-foreground">{d.path}</div>
-                              <UnifiedDiff before={d.before} after={d.after} />
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </ScrollArea>
-                  </div>
-                )}
-              </div>
+              </>
             )}
+          </div>
+
+          <div className="absolute inset-x-0 bottom-3 z-20 flex items-center justify-center px-4">
           </div>
         </div>
       </div>

@@ -132,3 +132,78 @@
     line-height: 1.5;
   }
 }
+
+/* Progress section expansion animations */
+.progress-section {
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.progress-section-expanded {
+  width: 90vw;
+  max-width: 1200px;
+  height: 80vh;
+  position: fixed;
+  top: 10vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 1.5rem;
+}
+
+.progress-section-normal {
+  width: 100%;
+  max-width: 32rem;
+  height: auto;
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  z-index: auto;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.progress-content {
+  transition: all 0.3s ease-in-out 0.1s;
+}
+
+.progress-content-expanded {
+  font-size: 0.875rem;
+  height: calc(100% - 3rem);
+}
+
+.progress-content-normal {
+  font-size: 0.75rem;
+  height: auto;
+}
+
+.progress-scroll-expanded {
+  height: calc(100vh - 300px);
+}
+
+.progress-scroll-normal {
+  height: 16rem;
+}
+
+/* Backdrop overlay */
+.progress-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.progress-backdrop-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
