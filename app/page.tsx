@@ -469,7 +469,7 @@ export default function Home() {
             {(running || logs.length > 0 || fileLists.length > 0 || fileDiffs.length > 0) && (
               <>
                 {/* Backdrop overlay */}
-                <div className={`progress-backdrop ${isProgressExpanded ? 'progress-backdrop-visible' : ''}`} onClick={() => setIsProgressExpanded(false)} />
+                <div className={`progress-backdrop  ${isProgressExpanded ? 'progress-backdrop-visible' : ''}`} onClick={() => setIsProgressExpanded(false)} />
 
                 <div className={`progress-section ${isProgressExpanded ? 'progress-section-expanded' : 'progress-section-normal w-full max-w-2xl mt-8'}`}>
                   <div className={`progress-content ${isProgressExpanded ? 'progress-content-expanded' : 'progress-content-normal'}`}>
