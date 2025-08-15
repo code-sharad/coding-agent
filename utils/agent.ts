@@ -37,7 +37,8 @@ export async function codingAgent(
   let sandbox: Sandbox | undefined;
 
   const result = await generateText({
-    model: openrouter.chat('qwen/qwen3-coder'),
+    // model: openrouter.chat('qwen/qwen3-coder'),
+    model:"gpt-4.1",
     prompt,
     system:
       `You are Qwen3 Coder, a large language model specialized in JavaScript and TypeScript development. You have access to the following tools to assist with coding tasks:
