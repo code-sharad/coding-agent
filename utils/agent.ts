@@ -9,6 +9,8 @@ import {
   readFile,
 } from "./sandbox";
 
+import { deepseek } from '@ai-sdk/deepseek';
+
 type TypeAccessToken = { email: string; token: string };
 export async function codingAgent(
   prompt: string,
@@ -31,7 +33,7 @@ export async function codingAgent(
   let sandbox: Sandbox | undefined;
 
   const result = await generateText({
-    model: "openai/gpt-4.1",
+    model: deepseek("deepseek-chat"),
     prompt,
     system:
       "You are a coding agent. You will be working with js/ts projects. Your responses must be concise. If you make changes to the codebase, be sure to run the create_pr tool once you are done.",
