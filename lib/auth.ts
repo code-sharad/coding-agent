@@ -14,6 +14,7 @@ const connectionString = process.env.DATABASE_URL!;
 export const auth = betterAuth({
   appName: "Coding Agent",
   baseURL,
+  secret:process.env.BETTER_AUTH_SECRET,
   database: new Pool({
     connectionString,
     // Uncomment if your Neon connection string lacks sslmode:

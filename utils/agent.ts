@@ -49,7 +49,7 @@ export async function codingAgent(
   let sandbox: Sandbox | undefined;
 
   const res = await generateText({
-    model: openrouter.chat('qwen/qwen3-coder'),
+    model: openrouter.chat('minimax/minimax-m2.5'),
     // model: groq('openai/gpt-oss-120b'),
     // model: openrouter.chat('qwen/qwen3-coder') as unknown as Parameters<typeof generateText>[0]["model"],
     prompt,
