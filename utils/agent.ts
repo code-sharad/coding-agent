@@ -11,6 +11,8 @@ import {
 
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { ollama, createOllama } from "ai-sdk-ollama"
+import { groq, createGroq } from "@ai-sdk/groq"
+
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
@@ -20,6 +22,10 @@ const ollamaInit = createOllama({
   apiKey: process.env.OLLAMA_API_KEY
 })
 
+const groqInit = createGroq({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: 'https://api.groq.com/openai/v1'
+})
 
 type TypeAccessToken = { email: string; token: string };
 export async function codingAgent(
@@ -44,7 +50,7 @@ export async function codingAgent(
 
   const res = await generateText({
     // model: openrouter.chat('qwen/qwen3-coder'),
-    model: ollama('kimi-k2.6:cloud'),
+    model: groq('openai/gpt-oss-120b'),
     // model: openrouter.chat('qwen/qwen3-coder') as unknown as Parameters<typeof generateText>[0]["model"],
     prompt,
     system:
