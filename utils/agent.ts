@@ -10,8 +10,8 @@ import {
 } from "./sandbox";
 
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import { ollama, createOllama } from "ai-sdk-ollama"
-import { groq, createGroq } from "@ai-sdk/groq"
+// import { ollama, createOllama } from "ai-sdk-ollama"
+// import { groq, createGroq } from "@ai-sdk/groq"
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
