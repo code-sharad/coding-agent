@@ -10,12 +10,6 @@ interface Repo {
   owner?: { login: string };
 }
 
-interface SessionResult {
-  session?: {
-    accessToken?: string;
-  };
-}
-
 export async function GET(request: Request) {
   // Try to read session using Better Auth API (Next.js route)
   let token: string | undefined;
