@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { Github, Play, Wand2, ShieldCheck, GitBranch, GitPullRequest, FileCode, Terminal, Rocket, BotIcon, Maximize2, Minimize2 } from "lucide-react";
+import { Github, Play, Wand2, ShieldCheck, GitBranch, GitPullRequest, FileCode, Terminal, Rocket, BotIcon, Maximize2, Minimize2, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
 
@@ -390,15 +390,28 @@ export default function Home() {
           {/* Header within bordered container */}
           <div className="flex items-center justify-between">
             <span className="text-md font-mono flex gap-2 justify-center items-center"><BotIcon /> Coding Agent</span>
-            <button
-              onClick={!authed ? handleConnect : undefined}
-              disabled={!authed && (connectLoading || sessionLoading)}
-              className="h-9 w-9 rounded-full border flex items-center justify-center"
-              aria-label={authed ? "Account" : "Connect GitHub"}
-              title={authed ? "Account" : "Connect GitHub"}
-            >
-              {!authed ? <Github className="h-4 w-4" /> : <Image className="rounded-full" width={36} height={36} src={`${session.data?.user?.image}`} alt="User Avatar" />}
-            </button>
+            <div className="flex items-center gap-2">
+              <a href="/Sharad_Bhadait_CV.pdf" download="Sharad_Bhadait_CV.pdf">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full h-9"
+                  aria-label="Download CV"
+                  title="Download CV"
+                >
+                  <FileDown className="mr-1 h-4 w-4" /> CV
+                </Button>
+              </a>
+              <button
+                onClick={!authed ? handleConnect : undefined}
+                disabled={!authed && (connectLoading || sessionLoading)}
+                className="h-9 w-9 rounded-full border flex items-center justify-center"
+                aria-label={authed ? "Account" : "Connect GitHub"}
+                title={authed ? "Account" : "Connect GitHub"}
+              >
+                {!authed ? <Github className="h-4 w-4" /> : <Image className="rounded-full" width={36} height={36} src={`${session.data?.user?.image}`} alt="User Avatar" />}
+              </button>
+            </div>
           </div>
 
           {/* Centered content */}
@@ -571,6 +584,9 @@ export default function Home() {
       <div className="absolute inset-x-0 bottom-3 z-20 flex items-center justify-center px-4">
         <p className="text-xs sm:text-sm text-muted-foreground">
           Designed and developed by <Link href="https://iamsharad.in" target="_blank" className="font-medium text-foreground cursor-pointer">Sharad Bhadait</Link>
+          <a href="/Sharad_Bhadait_CV.pdf" download="Sharad_Bhadait_CV.pdf" className="ml-2 inline-flex items-center gap-1 font-medium text-foreground cursor-pointer hover:underline">
+            <FileDown className="h-3 w-3" /> Download CV
+          </a>
         </p>
       </div>
     </div>
