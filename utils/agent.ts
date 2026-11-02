@@ -9,23 +9,29 @@ import {
   readFile,
 } from "./sandbox";
 
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-// import { ollama, createOllama } from "ai-sdk-ollama"
-// import { groq, createGroq } from "@ai-sdk/groq"
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
+  // `strict` targets the OpenRouter API itself; `compatible` is for 3rd-party
+  // gateways and skips OpenRouter-only request fields.
+  compatibility: "strict",
+  appName: "coding-agent",
+  appUrl: process.env.NEXT_PUBLIC_APP_URL,
 });
 
-// const ollamaInit = createOllama({
-//   baseURL: "https://api.ollama.com",
-//   apiKey: process.env.OLLAMA_API_KEY
-// })
+// Any slug from https://openrouter.ai/models?supported_parameters=tools works.
+// The -1017 suffix pins the October 17 snapshot, so behaviour does not drift.
+const DEFAULT_MODEL = "deepseek/deepseek-v4.1-flash-1017";
 
-// const groqInit = createGroq({
-//   apiKey: process.env.GROQ_API_KEY,
-//   baseURL: 'https://api.groq.com/openai/v1'
-// })
+function openRouterModel(modelId: string) {
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error(
+      "OPENROUTER_API_KEY is not set. Add it to .env — create one at https://openrouter.ai/keys.",
+    );
+  }
+  return openrouter(modelId);
+}
 
 type TypeAccessToken = { email: string; token: string };
 export async function codingAgent(
@@ -48,12 +54,14 @@ export async function codingAgent(
   log(`🚀 Starting coding agent for: ${repoUrl ?? "<no repo>"}`);
   let sandbox: Sandbox | undefined;
 
+  const modelLabel = process.env.AGENT_MODEL?.trim() || DEFAULT_MODEL;
+  log(`🧠 Model: openrouter:${modelLabel}`);
+
   const result = await generateText({
-    // model: openrouter.chat('minimax/minimax-m2.5'),
-    model: "gpt-4.1",
+    model: openRouterModel(modelLabel),
     prompt,
     system:
-      `You are Qwen3 Coder, a large language model specialized in JavaScript and TypeScript development. You have access to the following tools to assist with coding tasks:
+      `You are a coding agent specialized in JavaScript and TypeScript development. You have access to the following tools to assist with coding tasks:
 
 1. \`list_files\` - List files in a directory
 2. \`read_file\` - Read the contents of a file

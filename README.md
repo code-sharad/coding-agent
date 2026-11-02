@@ -11,7 +11,7 @@ Describe a task in plain English — it spins up an isolated sandbox, reads your
 
 - 🔐 **GitHub OAuth sign-in** — your repos, your tokens. Nothing is shared or stored in plaintext outside your session.
 - 📦 **Isolated sandboxes** — every task runs in a fresh [Vercel Sandbox](https://vercel.com/docs/sandbox) that clones your repo. Your local machine and `main` branch are never touched directly.
-- 🧠 **Repo-aware agent** — powered by **GPT-4.1** via OpenRouter and the Vercel AI SDK, with a tool loop (`list_files` → `read_file` → `edit_file` → `create_pr`).
+- 🧠 **Repo-aware agent** — powered by an open-weights model (**DeepSeek V4.1 Flash** by default, swap it with `AGENT_MODEL`) through the Vercel AI SDK on OpenRouter, with a tool loop (`list_files` → `read_file` → `edit_file` → `create_pr`).
 - 📡 **Live streaming UI** — logs, file listings, and real diffs are streamed over SSE as the agent works.
 - 🚀 **Automatic pull requests** — changes are committed to a new branch, pushed, and a PR is opened on your behalf via the GitHub API.
 - 🎯 **Exact-match editing** — the agent verifies file contents before editing, so diffs are precise and reviewable.
@@ -29,7 +29,7 @@ Describe a task in plain English — it spins up an isolated sandbox, reads your
 ┌────────────┐   Better Auth   ┌────────────┐    │   codingAgent()      │
 │  Better    │ ◄─────────────► │ Neon PG    │    │   utils/agent.ts     │
 │  Auth      │   (sessions,   │ (Drizzle   │    │                      │
-│  (GitHub)  │    accounts)   │  ORM)      │    │  GPT-4.1 via AI SDK │
+│  (GitHub)  │    accounts)   │  ORM)      │    │  AI SDK agent loop   │
 └────────────┘                 └────────────┘    └──────────┬───────────┘
                                                                             │
                                                     tools execute in       ▼
@@ -61,7 +61,7 @@ Describe a task in plain English — it spins up an isolated sandbox, reads your
 | Styling       | Tailwind CSS v4, shadcn/ui + Radix primitives, lucide-react                 |
 | Auth          | [Better Auth](https://better-auth.com) with GitHub OAuth                    |
 | Database      | [Neon PostgreSQL](https://neon.tech) + [Drizzle ORM](https://orm.drizzle.team) |
-| AI            | [Vercel AI SDK](https://sdk.vercel.ai) v6 (`generateText`, tool calling) · GPT-4.1 via [OpenRouter](https://openrouter.ai) |
+| AI            | [Vercel AI SDK](https://sdk.vercel.ai) v6 (`generateText`, tool calling) · open-weights model via [OpenRouter](https://openrouter.ai) |
 | Sandboxing    | [@vercel/sandbox](https://vercel.com/docs/sandbox) (Node 22 runtime)         |
 | Streaming     | Server-Sent Events (native `ReadableStream`)                                |
 | Analytics     | @vercel/analytics                                                          |
@@ -147,8 +147,12 @@ GITHUB_CLIENT_SECRET=""
 # Secret used to sign Better Auth sessions (generate with: openssl rand -base64 32)
 BETTER_AUTH_SECRET=""
 
-# OpenRouter API key (for GPT-4.1)
+# OpenRouter API key (required)
 OPENROUTER_API_KEY=""
+
+# OpenRouter model slug. Must support tool calling.
+# Default: deepseek/deepseek-v4.1-flash-1017
+AGENT_MODEL=""
 
 # Public URL of the app
 NEXT_PUBLIC_APP_URL="http://localhost:3000"

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an AI-powered coding agent that clones GitHub repos into a Vercel sandbox, accepts natural language tasks, uses GPT-4.1 (via OpenRouter) to make code changes, and can create PRs. Built with Next.js 15 (App Router), Drizzle ORM, Better Auth with GitHub OAuth, and the Vercel AI SDK.
+This is an AI-powered coding agent that clones GitHub repos into a Vercel sandbox, accepts natural language tasks, uses an open-weights model (DeepSeek V4.1 Flash by default, configurable via `AGENT_MODEL`) through OpenRouter to make code changes, and can create PRs. Built with Next.js 15 (App Router), Drizzle ORM, Better Auth with GitHub OAuth, and the Vercel AI SDK.
 
 ## Build Commands
 
@@ -25,7 +25,7 @@ Users sign in via GitHub OAuth (Better Auth). Sessions are stored in Neon Postgr
 
 ### Agent Execution Flow (SSE Streaming)
 1. User selects a repo and enters a task → POST `/api/jobs/stream`
-2. `utils/agent.ts` runs the AI agent using Vercel AI SDK with GPT-4.1 via OpenRouter
+2. `utils/agent.ts` runs the AI agent with the Vercel AI SDK via OpenRouter; the model comes from `AGENT_MODEL` (default `deepseek/deepseek-v4.1-flash-1017`)
 3. The agent has tools: `read_file`, `list_files`, `edit_file`, `create_pr`
 4. Each tool call triggers sandbox operations via `utils/sandbox.ts` (clones repo, runs shell commands)
 5. Progress streams back to the UI via Server-Sent Events (SSE)
@@ -51,7 +51,17 @@ Neon PostgreSQL with Drizzle ORM. Schema files:
 DATABASE_URL           # Neon PostgreSQL connection string
 GITHUB_CLIENT_ID       # GitHub OAuth App client ID
 GITHUB_CLIENT_SECRET   # GitHub OAuth App client secret
-OPENROUTER_API_KEY     # OpenRouter API key for GPT-4.1
+OPENROUTER_API_KEY     # OpenRouter API key (required)
+AGENT_MODEL            # OpenRouter model slug, default deepseek/deepseek-v4.1-flash-1017
 NEXT_PUBLIC_APP_URL    # App URL (e.g., http://localhost:3000)
 GITHUB_TOKEN           # Personal access token (optional, for non-OAuth operations)
 ```
+
+# Brain
+
+The `brain/` directory is an Obsidian vault — persistent memory across sessions.
+
+- **Read first.** Read brain files relevant to your task before acting.
+- **Write** after mistakes, corrections, or notable codebase learnings.
+- **Structure:** One topic per file. Directories with `[[wikilink]]` indexes — no inlined content.
+- **Maintain:** Delete outdated notes and stale artifacts.
