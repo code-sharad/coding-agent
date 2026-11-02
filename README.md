@@ -19,28 +19,26 @@ Describe a task in plain English — it spins up an isolated sandbox, reads your
 ## 🏗️ Architecture
 
 ```
-┌────────────┐     POST /api/jobs/stream      ┌──────────────────────┐
-│  Browser   │ ─────────────────────────────► │   Next.js API Route  │
-│  (React)   │ ◄────────────── SSE ────────── │   (SSE endpoint)      │
-└────────────┘   log / file_list / file_diff  └──────────┬───────────┘
-      │                 / pr_created / result            │
-      │ sign in w/ GitHub                               ▼
-      ▼                                          ┌──────────────────────┐
-┌────────────┐   Better Auth   ┌────────────┐    │   codingAgent()      │
-│  Better    │ ◄─────────────► │ Neon PG    │    │   utils/agent.ts     │
-│  Auth      │   (sessions,   │ (Drizzle   │    │                      │
-│  (GitHub)  │    accounts)   │  ORM)      │    │  AI SDK agent loop   │
-└────────────┘                 └────────────┘    └──────────┬───────────┘
-                                                                            │
-                                                    tools execute in       ▼
-                                                                            │
-                                                 ┌──────────────────────────┐
-                                                 │   Vercel Sandbox          │
-                                                 │  - git clone (token-auth) │
-                                                 │  - cat / ls / writeFiles  │
-                                                 │  - git commit & push      │
-                                                 │  - GitHub API → PR        │
-                                                 └──────────────────────────┘
+┌────────────┐                               ┌─────────────────────────────────────┐
+│  Browser   │ ── POST /api/jobs/stream ────►│      Next.js API Route              │
+│  (React)   │ ◄─────── SSE ──────────────── │      SSE endpoint                    │
+└────────────┘                               └─────────────────────────────────────┘
+      │ sign in w/ GitHub                                  │
+      ▼                                                    ▼
+┌────────────┐    ┌────────────┐             ┌─────────────────────────────────────┐
+│  Better    │◄──►│  Neon PG   │             │      codingAgent()                  │
+│  Auth      │    │  (Drizzle  │             │      utils/agent.ts                 │
+│  (GitHub)  │    │   ORM)     │             │      AI SDK tool loop, 30 steps     │
+└────────────┘    └────────────┘             └─────────────────────────────────────┘
+                                                           │ tool calls
+                                                           ▼
+                                             ┌─────────────────────────────────────┐
+                                             │      Vercel Sandbox                 │
+                                             │      - git clone (token auth)       │
+                                             │      - list / read / write files    │
+                                             │      - git commit & push            │
+                                             │      - GitHub API -> pull request   │
+                                             └─────────────────────────────────────┘
 ```
 
 **Execution flow:**
@@ -78,6 +76,7 @@ Describe a task in plain English — it spins up an isolated sandbox, reads your
 │   │   │   ├── repos/route.ts
 │   │   │   └── status/route.ts
 │   │   └── jobs/
+│   │       ├── route.ts                  # Job create / list
 │   │       └── stream/route.ts           # SSE endpoint — runs the agent
 │   ├── layout.tsx                        # Root layout, fonts, analytics
 │   └── page.tsx                          # Main UI (repo picker, task input, live progress)
@@ -92,11 +91,31 @@ Describe a task in plain English — it spins up an isolated sandbox, reads your
 │   ├── auth-client.ts                    # Better Auth React client
 │   └── utils.ts                          # cn() helper
 ├── utils/
-│   ├── agent.ts                          # The agent: system prompt + tool loop
+│   ├── agent.ts                          # The agent: OpenRouter model, system prompt, tool loop
 │   └── sandbox.ts                        # Sandbox ops: clone, read, edit, commit, PR
+├── types/ambient.d.ts                    # Module declarations (canvas-confetti)
+│
+│   ── build tooling, not app code ──
+├── .agents/skills/                       # Agent playbooks: plan, execute, review, reflect, schedule
+├── adapters/                             # Backlog adapters Noodle drives against todos.md
+├── brain/                                # Obsidian vault: principles + plans
+├── todos.md                              # The backlog those adapters read/write
+├── .noodle.toml                          # Noodle config: provider, model, skills, adapters
 ├── drizzle.config.ts
 └── next.config.ts
 ```
+
+## 🧪 How this repo is built (agent workspace)
+
+The `brain/`, `adapters/`, `.agents/` and `.noodle.toml` paths are **not part of the Next.js app** — they are the tooling used to build it. Nothing in `app/`, `db/`, `lib/` or `utils/` imports them, so they never reach the bundle.
+
+| Path | What it is |
+|------|------------|
+| `brain/` | Obsidian vault holding engineering principles (`brain/principles/*.md`) and phase plans (`brain/plans/`). Read before a task, written after a correction, indexed with `[[wikilinks]]`. |
+| `.agents/skills/` | Task playbooks the agent loads on demand — `plan`, `execute`, `review`, `reflect`, `schedule`, `noodle`. |
+| `adapters/` | Portable POSIX `sh` scripts (`backlog-add`, `backlog-sync`, `backlog-done`, `backlog-edit`) that expose `todos.md` as a backlog. Noodle shells out to these, so the backlog format is swappable without touching the scheduler. |
+| `.noodle.toml` | Noodle config — provider/model for scheduling, skill path, and the adapter wiring above. |
+| `todos.md` | The backlog those adapters read and write. |
 
 ## 🚀 Getting Started
 
@@ -113,8 +132,10 @@ Describe a task in plain English — it spins up an isolated sandbox, reads your
 ```bash
 git clone https://github.com/code-sharad/coding-agent.git
 cd coding-agent
-npm install
+bun install
 ```
+
+`bun.lock` is the lockfile kept current here, so use Bun to get the same dependency tree. Every script below also works with `npm run <script>`.
 
 ### 2. Create a GitHub OAuth App
 
@@ -131,7 +152,7 @@ npm install
 ### 3. Configure environment variables
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env       # .env.local works too — Next.js reads both
 ```
 
 Then fill in the values:
@@ -158,33 +179,43 @@ AGENT_MODEL=""
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
+`OPENROUTER_API_KEY` is required — without it the agent throws before doing any work. `AGENT_MODEL` is any slug that supports tool calling:
+
+```dotenv
+AGENT_MODEL="deepseek/deepseek-v4.1-flash-1017"   # default — 1M context, tool calling
+AGENT_MODEL="zai/glm-4.7-flash"                   # cheapest option
+AGENT_MODEL="moonshotai/kimi-k2.5"                # 256k context
+```
+
+The default pins a dated DeepSeek snapshot, so upgrading is an explicit decision rather than a silent drift.
+
 ### 4. Set up the database
 
 ```bash
-npm run db:push        # Push the Drizzle schema to Neon
-npm run auth:migrate   # Create Better Auth tables
+bun run db:push        # Push the Drizzle schema to Neon
+bun run auth:migrate   # Create Better Auth tables
 ```
 
 ### 5. Run it
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000), connect your GitHub, pick a repo, describe a task, and hit **Run agent**.
 
 ## 📜 Available Scripts
 
-| Command              | Description                                    |
-|----------------------|------------------------------------------------|
-| `npm run dev`        | Start the dev server (Turbopack)                |
-| `npm run build`      | Production build                               |
-| `npm run start`      | Start the production server                    |
-| `npm run lint`       | ESLint (`next/core-web-vitals`)                |
-| `npm run db:generate`| Generate Drizzle migrations                     |
-| `npm run db:push`     | Push schema directly to the database            |
-| `npm run auth:generate` | Generate Better Auth types & schema          |
-| `npm run auth:migrate`  | Run Better Auth migrations (uses `bunx`)     |
+| Command                   | Description                                  |
+|---------------------------|----------------------------------------------|
+| `bun run dev`             | Start the dev server (Turbopack)             |
+| `bun run build`           | Production build                             |
+| `bun run start`           | Start the production server                  |
+| `bun run lint`            | ESLint (`next/core-web-vitals`)              |
+| `bun run db:generate`     | Generate Drizzle migrations                  |
+| `bun run db:push`         | Push schema directly to the database         |
+| `bun run auth:generate`   | Generate Better Auth types & schema          |
+| `bun run auth:migrate`    | Run Better Auth migrations (uses `bunx`)     |
 
 ## 🔌 API Reference
 
